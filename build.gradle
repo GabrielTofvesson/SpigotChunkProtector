@@ -1,0 +1,195 @@
+plugins {
+    id 'java'
+    id 'kr.entree.spigradle' version '2.2.4'
+    id 'org.jetbrains.kotlin.jvm' version '1.5.20'
+}
+
+group 'dev.w1zzrd.spigot.chunkprotector'
+version '1.0-SNAPSHOT'
+
+repositories {
+    maven {
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+
+        // As of Gradle 5.1, you can limit this to only those
+        // dependencies you expect from it
+        content {
+            includeGroup 'org.bukkit'
+            includeGroup 'org.spigotmc'
+        }
+    }
+    /*
+     As Spigot-API depends on the Bungeecord ChatComponent-API,
+    we need to add the Sonatype OSS repository, as Gradle,
+    in comparison to maven, doesn't want to understand the ~/.m2
+    directory unless added using mavenLocal(). Maven usually just gets
+    it from there, as most people have run the BuildTools at least once.
+    This is therefore not needed if you're using the full Spigot/CraftBukkit,
+    or if you're using the Bukkit API.
+    */
+    maven {
+        url = "https://papermc.io/repo/repository/maven-public"
+
+        content {
+            includeGroup 'io.papermc.paper'
+        }
+    }
+    maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
+    maven { url = 'https://oss.sonatype.org/content/repositories/central' }
+    mavenLocal() // This is needed for CraftBukkit and Spigot.
+
+    mavenCentral()
+    protocolLib()
+    jitpack() // For vault
+}
+
+dependencies {
+    // Pick only one of these and read the comment in the repositories block.
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8" // The Spigot API with no shadowing. Requires the OSS repo.
+    implementation files('lib/SpigotWizCompat.jar')
+
+    compileOnly spigot('1.17') // Or spigot()
+    //compileOnly protocolLib()
+    //compileOnly vault()
+}
+
+spigot {
+    authors = ['IKEAJesus']
+    depends = ['WizCompat', 'Kotlin']
+    apiVersion = '1.16'
+    load = STARTUP
+
+    commands {
+        claim {
+            description = 'Start claiming land'
+            permission = 'chunkprotector.claim'
+            permissionMessage = 'You are not allowed to claim land!'
+            usage = '/<command> [claim]'
+        }
+
+        unclaim {
+            description = 'Un-claim a claimed region'
+            permission = 'chunkprotector.unclaim'
+            permissionMessage = 'You are not allowed to unclaim land!'
+            usage = '/<command> [claim]'
+        }
+
+        invite {
+            description = 'Invite a player to a claimed area'
+            permission = 'chunkprotector.invite'
+            permissionMessage = 'You are not allowed to invite players!'
+            usage = '/<command> [player] [claim]'
+        }
+
+        uninvite {
+            description = 'Un-invite a player from a claimed area'
+            permission = 'chunkprotector.uninvite'
+            permissionMessage = 'You are not allowed to un-invite players!'
+            usage = '/<command> [player] [claim]'
+        }
+
+        claims {
+            description = 'Get a list of all owned claims'
+            permission = 'chunkprotector.listclaims'
+            permissionMessage = 'You are not allowed get a list of your claims!'
+            usage = '/<command>'
+        }
+
+        claimowner {
+            description = 'Get the owner of the current chunk'
+            permission = 'chunkprotector.claimowner'
+            permissionMessage = 'You are not allowed to check who owns this chunk!'
+            usage = '/<command>'
+        }
+
+        showclaim {
+            description = 'Show the outline of a claimed region'
+            permission = 'chunkprotector.showclaim'
+            permissionMessage = 'You are not allowed to see the claimed region!'
+            usage = '/<command> {claim}'
+        }
+
+        claimoption {
+            description = 'Change properties of a claimed area'
+            permission = 'chunkprotector.claimoption'
+            permissionMessage = 'You are not allowed to change the properties of a claimed area!'
+            usage = '/<command> {claim} [claimOption] [true/false]'
+        }
+    }
+
+    permissions {
+        'chunkprotector.claim' {
+            description = 'Allows access to /claim'
+            defaults = 'true'
+        }
+        'chunkprotector.unclaim' {
+            description = 'Allows access to /unclaim'
+            defaults = 'true'
+        }
+        'chunkprotector.invite' {
+            description = 'Allows access to /invite'
+            defaults = 'true'
+        }
+        'chunkprotector.uninvite' {
+            description = 'Allows access to /uninvite'
+            defaults = 'true'
+        }
+        'chunkprotector.listclaims' {
+            description = 'Allows access to /claims'
+            defaults = 'true'
+        }
+        'chunkprotector.bypass' {
+            description = 'Allows bypassing of all command-related claim restrictions'
+            defaults = 'op'
+        }
+        'chunkprotector.ignore' {
+            description = 'Allows bypassing of all physical claim restrictions'
+            defaults = 'op'
+        }
+        'chunkprotector.claimowner' {
+            description = 'Allows access to /claimowner'
+            defaults = 'true'
+        }
+        'chunkprotector.showclaim' {
+            description = 'Allows access to /showclaim'
+            defaults = 'true'
+        }
+        'chunkprotector.claimoption' {
+            description = 'Allows access to /claimoption'
+            defaults = 'true'
+        }
+    }
+
+    /*
+    commands {
+        give {
+            aliases = ['i']
+            description = 'Give command.'
+            permission = 'test.foo'
+            permissionMessage = 'You do not have permission!'
+            usage = '/<command> [test|stop]'
+        }
+    }
+    permissions {
+        'test.foo' {
+            description = 'Allows foo command'
+            defaults = 'true'
+        }
+        'test.*' {
+            description = 'Wildcard permission'
+            defaults = 'op'
+            children = ['test.foo': true]
+        }
+    }
+    */
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "16"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "16"
+    }
+}
